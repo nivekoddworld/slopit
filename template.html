@@ -85,22 +85,25 @@
     letter-spacing: .2em; color: var(--hazard);
   }
   .intake-note { margin: 0 0 1rem; font-size: .78rem; color: var(--dim); }
-  .intake textarea {
-    width: 100%; padding: .75rem; resize: vertical;
+  .intake textarea, .intake input {
+    width: 100%; padding: .7rem; margin-bottom: .6rem;
     background: #14141a; color: var(--text);
     border: 1px solid var(--edge); border-radius: 4px;
     font: inherit; font-size: .85rem;
   }
-  .intake textarea:focus { outline: none; border-color: var(--ooze); }
+  .intake textarea { resize: vertical; }
+  .intake textarea:focus, .intake input:focus { outline: none; border-color: var(--ooze); }
+  #hp { position: absolute; left: -9999px; }
   .intake button {
-    margin-top: .75rem; padding: .6rem 1.1rem;
-    background: var(--hazard); color: #1a1a20;
+    padding: .6rem 1.1rem; background: var(--hazard); color: #1a1a20;
     border: none; border-radius: 4px; cursor: pointer;
     font: inherit; font-size: .75rem; font-weight: 700; letter-spacing: .14em;
   }
-  .intake button:hover { background: var(--ooze); }
-  .intake .err { margin-top: .6rem; font-size: .78rem; color: #e88; }
-</style>
+  .intake button:hover:not(:disabled) { background: var(--ooze); }
+  .intake button:disabled { opacity: .5; cursor: default; }
+  .status { margin-top: .7rem; font-size: .78rem; min-height: 1.2em; }
+  .status.ok { color: var(--ooze); }
+  .status.bad { color: #e8888f; }</style>
 </head>
 <body>
   <div class="hazard"></div>
@@ -117,7 +120,10 @@
       <h2>SLOP INTAKE VALVE</h2>
       <p class="intake-note">Describe a game. It gets logged for future dumping.</p>
       <textarea id="prompt" rows="3" placeholder="a roguelike where you play as a disappointed pigeon"></textarea>
+      <input id="who" type="text" placeholder="your name (optional)" autocomplete="name">
+      <input id="hp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
       <button id="submit" type="button">DUMP IT IN &darr;</button>
+      <div id="status" class="status"></div>
     </section>
     <footer>
       FACILITY 07 &middot; <span class="ooze">{{COUNT}}</span> UNIT{{PLURAL}} IN CONTAINMENT
@@ -141,25 +147,42 @@
       </div>
 </template>
 <script>
-  const REPO = 'nivekoddworld/slopit';
-  document.getElementById('submit').addEventListener('click', () => {
-    const box = document.getElementById('prompt');
+  const ENDPOINT = 'https://slopit-intake.kevin-weeks.workers.dev';
+  const btn = document.getElementById('submit');
+  const box = document.getElementById('prompt');
+  const who = document.getElementById('who');
+  const hp = document.getElementById('hp');
+  const status = document.getElementById('status');
+
+  const say = (msg, cls) => { status.textContent = msg; status.className = 'status ' + cls; };
+
+  box.addEventListener('input', () => { if (status.className.includes('bad')) say('', ''); });
+
+  btn.addEventListener('click', async () => {
     const text = box.value.trim();
-    const old = document.querySelector('.intake .err');
-    if (old) old.remove();
-    if (!text) {
-      const e = document.createElement('div');
-      e.className = 'err';
-      e.textContent = 'The valve is empty. Describe something first.';
-      box.after(e);
-      return;
+    if (!text) return say('The valve is empty. Describe something first.', 'bad');
+
+    btn.disabled = true;
+    say('DUMPING…', '');
+
+    try {
+      const res = await fetch(ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: text,
+          from: who.value.trim(),
+          hp: hp.value
+        })
+      });
+      if (!res.ok) throw new Error(res.status);
+      box.value = '';
+      say('LOGGED. IT WILL BE DEALT WITH EVENTUALLY.', 'ok');
+    } catch {
+      say('THE VALVE JAMMED. TRY AGAIN.', 'bad');
+    } finally {
+      btn.disabled = false;
     }
-    const title = text.length > 60 ? text.slice(0, 60) + '…' : text;
-    const url = 'https://github.com/' + REPO + '/issues/new'
-      + '?labels=slop-request'
-      + '&title=' + encodeURIComponent(title)
-      + '&body=' + encodeURIComponent(text);
-    window.open(url, '_blank');
   });
 </script>
 </body>
