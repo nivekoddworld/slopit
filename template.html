@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>THE SLOPIT</title>
+<style>
+  :root {
+    --pit: #16161c; --plate: #22222c; --plate-hi: #2c2c38; --edge: #3a3a4a;
+    --hazard: #f2c14e; --ooze: #9ecb56; --text: #e6e6ef; --dim: #8b8b9e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--pit);
+    background-image:
+      radial-gradient(circle at 50% -10%, #23232f 0%, transparent 60%),
+      repeating-linear-gradient(0deg, transparent 0 3px, rgba(0,0,0,.16) 3px 4px);
+    color: var(--text);
+    font: 15px/1.5 ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
+    padding-bottom: 4rem;
+  }
+  .hazard {
+    height: 14px;
+    background: repeating-linear-gradient(-45deg, var(--hazard) 0 14px, #1a1a20 14px 28px);
+    box-shadow: 0 2px 12px rgba(0,0,0,.6);
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 0 1.25rem; }
+  header { text-align: center; padding: 3.25rem 0 2.5rem; }
+  h1 {
+    margin: 0; font-size: clamp(2.6rem, 11vw, 4.75rem); font-weight: 800;
+    letter-spacing: .16em; text-indent: .16em; color: var(--hazard);
+    text-shadow: 0 3px 0 #7a5f1c, 0 5px 14px rgba(0,0,0,.7);
+  }
+  .stencil {
+    display: inline-block; margin-top: .9rem; padding: .3rem .85rem;
+    border: 2px dashed var(--edge); border-radius: 4px;
+    color: var(--dim); font-size: .72rem; letter-spacing: .22em;
+  }
+  .drip { color: var(--ooze); font-size: 1.5rem; letter-spacing: .35em; margin-top: 1.1rem; }
+  .slop {
+    display: block; position: relative; margin-bottom: .85rem;
+    padding: 1.35rem 1.5rem 1.35rem 1.75rem;
+    border: 1px solid var(--edge); border-left: 6px solid var(--hazard); border-radius: 6px;
+    background:
+      radial-gradient(circle at 12px 12px, var(--edge) 1.5px, transparent 2px),
+      radial-gradient(circle at calc(100% - 12px) 12px, var(--edge) 1.5px, transparent 2px),
+      radial-gradient(circle at 12px calc(100% - 12px), var(--edge) 1.5px, transparent 2px),
+      radial-gradient(circle at calc(100% - 12px) calc(100% - 12px), var(--edge) 1.5px, transparent 2px),
+      linear-gradient(160deg, var(--plate-hi), var(--plate));
+    color: inherit; text-decoration: none;
+    transition: transform .13s ease, border-left-color .13s, box-shadow .13s;
+  }
+  .slop:hover {
+    transform: translateY(-3px) rotate(-.35deg);
+    border-left-color: var(--ooze); box-shadow: 0 8px 0 -2px rgba(0,0,0,.45);
+  }
+  .slop:active { transform: translateY(1px); }
+  .tag { font-size: .66rem; letter-spacing: .2em; color: var(--hazard); opacity: .8; margin-bottom: .4rem; }
+  .slop h2 { margin: 0 0 .3rem; font-size: 1.12rem; font-weight: 700; letter-spacing: .02em; }
+  .slug { font-size: .8rem; color: var(--dim); }
+  .go {
+    position: absolute; right: 1.4rem; bottom: 1.35rem;
+    font-size: .7rem; letter-spacing: .16em; color: var(--ooze);
+    opacity: 0; transition: opacity .13s;
+  }
+  .slop:hover .go { opacity: 1; }
+  .void { text-align: center; padding: 3rem 1rem; color: var(--dim); }
+  .void-mouth { font-size: 2rem; margin-bottom: .75rem; }
+  footer {
+    margin-top: 3rem; padding-top: 1.4rem; border-top: 1px solid var(--edge);
+    text-align: center; font-size: .7rem; letter-spacing: .14em; color: var(--dim);
+  }
+  footer .ooze { color: var(--ooze); }
+  @media (prefers-reduced-motion: reduce) {
+    .slop, .go { transition: none; }
+    .slop:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="hazard"></div>
+  <main>
+    <header>
+      <h1>THE SLOPIT</h1>
+      <div class="stencil">UNREFINED OUTPUT &middot; DO NOT INHALE</div>
+      <div class="drip">~ ~ ~</div>
+    </header>
+
+    {{CARDS}}
+
+    <footer>
+      FACILITY 07 &middot; <span class="ooze">{{COUNT}}</span> UNIT{{PLURAL}} IN CONTAINMENT
+      &middot; DUMPED {{DATE}}
+    </footer>
+  </main>
+
+<template id="card">
+      <a class="slop" href="./{{SLUG}}/">
+        <div class="tag">SLOP-{{NUM}}</div>
+        <h2>{{TITLE}}</h2>
+        <div class="slug">{{SLUG}}/</div>
+        <div class="go">DESCEND &rarr;</div>
+      </a>
+</template>
+
+<template id="empty">
+      <div class="void">
+        <div class="void-mouth">( &#728; &#179;&#728; )</div>
+        <p>PIT IS EMPTY. NOTHING HAS BEEN DUMPED YET.</p>
+      </div>
+</template>
+</body>
+</html>
